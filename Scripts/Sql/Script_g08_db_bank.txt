@@ -19,9 +19,9 @@ CREATE TABLE public."Person"
     password character varying(150) COLLATE pg_catalog."default",
     name character varying(500) COLLATE pg_catalog."default",
     CONSTRAINT "Person_pkey" PRIMARY KEY ("personId")
-)
+);
 
-TABLESPACE pg_default;
+--TABLESPACE pg_default;
 DROP SEQUENCE IF EXISTS account_seq;
 
 CREATE SEQUENCE account_seq;
@@ -43,9 +43,9 @@ CREATE TABLE public."Account"
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
         NOT VALID
-)
+);
 
-TABLESPACE pg_default;
+--TABLESPACE pg_default;
 
 ALTER TABLE public."Account"
     OWNER to pguser;
@@ -64,9 +64,9 @@ DROP TABLE IF EXISTS Administrator;
     username character varying(250) COLLATE pg_catalog."default",
     password character varying(150) COLLATE pg_catalog."default",
     CONSTRAINT "Administrator_pkey" PRIMARY KEY ("administratorId")
-)
+);
 
-TABLESPACE pg_default;
+--TABLESPACE pg_default;
 
 ALTER TABLE public."Administrator"
     OWNER to pguser;
@@ -82,9 +82,9 @@ CREATE TABLE public."TransactionType"
     "transactionTypeId" integer NOT NULL DEFAULT NEXTVAL('transactiontype_seq'),
     description character varying(255) COLLATE pg_catalog."default",
     CONSTRAINT "TransactionType_pkey" PRIMARY KEY ("transactionTypeId")
-)
+);
 
-TABLESPACE pg_default;
+--TABLESPACE pg_default;
 
 ALTER TABLE public."TransactionType"
     OWNER to pguser;
@@ -113,9 +113,9 @@ CREATE TABLE public."AccountTransaction"
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
         NOT VALID
-)
+);
 
-TABLESPACE pg_default;
+--TABLESPACE pg_default;
 
 ALTER TABLE public."AccountTransaction"
     OWNER to pguser;
