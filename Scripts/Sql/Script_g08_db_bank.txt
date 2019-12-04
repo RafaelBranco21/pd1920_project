@@ -1,0 +1,126 @@
+CREATE USER pguser WITH PASSWORD 'pgpass';
+
+CREATE DATABASE g08_bank_db WITH OWNER = pguser;
+	
+-- \c g08_bank_db;
+
+DROP SEQUENCE IF EXISTS person_seq;
+
+CREATE SEQUENCE person_seq;
+
+DROP TABLE IF EXISTS Person; 
+
+CREATE TABLE public."Person"
+(
+	
+    "personId" integer NOT NULL DEFAULT NEXTVAL('person_seq'),
+    nif integer,
+    username character varying(255) COLLATE pg_catalog."default",
+    password character varying(150) COLLATE pg_catalog."default",
+    name character varying(500) COLLATE pg_catalog."default",
+    CONSTRAINT "Person_pkey" PRIMARY KEY ("personId")
+)
+
+TABLESPACE pg_default;
+DROP SEQUENCE IF EXISTS account_seq;
+
+CREATE SEQUENCE account_seq;
+
+DROP TABLE IF EXISTS Account; 
+
+
+CREATE TABLE public."Account"
+(
+    "accountId" integer NOT NULL DEFAULT NEXTVAL('account_seq'),
+    "personId" integer,
+    description character varying(500) COLLATE pg_catalog."default",
+    "isFrozen" boolean,
+    "isDeleted" boolean,
+    balance numeric(20,5),
+    CONSTRAINT "Account_pkey" PRIMARY KEY ("accountId"),
+    CONSTRAINT "personId" FOREIGN KEY ("personId")
+        REFERENCES public."Person" ("personId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."Account"
+    OWNER to pguser;
+
+DROP SEQUENCE IF EXISTS administrator_seq;
+
+CREATE SEQUENCE administrator_seq;
+
+DROP TABLE IF EXISTS Administrator; 
+
+	
+	CREATE TABLE public."Administrator"
+(
+    name character varying(500) COLLATE pg_catalog."default",
+    "administratorId" integer NOT NULL DEFAULT NEXTVAL('administrator_seq'),
+    username character varying(250) COLLATE pg_catalog."default",
+    password character varying(150) COLLATE pg_catalog."default",
+    CONSTRAINT "Administrator_pkey" PRIMARY KEY ("administratorId")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."Administrator"
+    OWNER to pguser;
+	
+DROP SEQUENCE IF EXISTS transactiontype_seq;
+
+CREATE SEQUENCE transactiontype_seq;
+
+DROP TABLE IF EXISTS TransactionType; 
+
+CREATE TABLE public."TransactionType"
+(
+    "transactionTypeId" integer NOT NULL DEFAULT NEXTVAL('transactiontype_seq'),
+    description character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT "TransactionType_pkey" PRIMARY KEY ("transactionTypeId")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."TransactionType"
+    OWNER to pguser;
+
+DROP SEQUENCE IF EXISTS accounttransaction_seq;
+
+CREATE SEQUENCE accounttransaction_seq;
+
+DROP TABLE IF EXISTS AccountTransaction; 
+	
+CREATE TABLE public."AccountTransaction"
+(
+    "accountId" integer NOT NULL,
+    "transactionTypeId" integer NOT NULL,
+    value numeric(20,5),
+    "accountTransactionId" integer NOT NULL DEFAULT NEXTVAL('accounttransaction_seq'),
+    date date NOT NULL,
+    CONSTRAINT "AccountTransaction_pkey" PRIMARY KEY ("accountId", "transactionTypeId", "accountTransactionId"),
+    CONSTRAINT "accountId_fk" FOREIGN KEY ("accountId")
+        REFERENCES public."Account" ("accountId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "transactionTypeId_fk" FOREIGN KEY ("transactionTypeId")
+        REFERENCES public."TransactionType" ("transactionTypeId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."AccountTransaction"
+    OWNER to pguser;
+
+	
+
+	
+	
