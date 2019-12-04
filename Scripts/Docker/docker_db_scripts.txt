@@ -1,0 +1,33 @@
+#CONTAINER BOLSA DE VALORES
+
+# Get postgres docker image
+docker pull postgres:latest
+
+# Create simulator docker network
+docker network create --subnet=172.8.0.0/16 g08_mynet
+
+# Run docker 
+docker run --rm --name g08_stock_market_db -e POSTGRES_PASSWORD=pgpass -d -v /home/$USER/pdtp/g08_stock_market_db_vol:/var/lib/postgresql/data --net g08_mynet --ip 172.8.0.3 postgres
+
+
+# -------------------------------------------------
+# Use psqlclient or pgadmin to connect to database instance
+psql -h 172.8.0.3 -U postgres -d postgres
+
+# Insert password => pgpass
+
+# Inject process in bank container
+# docker exec -it g08_stock_market_db /bin/sh
+
+# Stop container
+# docker stop g08_stock_market_db
+
+#-------------------------------------------
+
+
+#CONTAINER BANCO:
+#É A MESMA REDE
+#172.8.0.0/16 g08_mynet
+
+# Run docker 
+docker run --rm --name g08_bank_bd -e POSTGRES_PASSWORD=pgpass -d -v /home/$USER/pdtp/g08_bank_bd_vol:/var/lib/postgresql/data --net g08_mynet --ip 172.8.0.4 postgres

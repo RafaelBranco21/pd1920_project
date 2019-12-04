@@ -1,0 +1,13 @@
+#build image to payara
+docker build -t g08_payara_bank_img  .
+
+# run image to bank
+docker run --rm --name g08_payara_bank --net g08_mynet --ip 172.8.0.5 -p 8080 -p 4848 g08_payara_bank_img
+
+# run image to stock market
+# docker run --rm --name g08_payara_stock_market --net g08_mynet --ip 172.8.0.6 -p 8080 -p 4848 g08_payara_bank_img
+
+#falta configurar connection pull e datasources em ambos containers
+
+#stop container
+#docker stop g08_payara_bank

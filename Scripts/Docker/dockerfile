@@ -1,0 +1,2 @@
+FROM payara/server-full
+COPY ./postgresql-42.2.8.jar /opt/payara/appserver/glassfish/lib

@@ -1,0 +1,235 @@
+CREATE USER pguser WITH PASSWORD 'pgpass';
+
+CREATE DATABASE g08_stock_market_db WITH OWNER = pguser;	
+
+
+DROP SEQUENCE IF EXISTS administrator_seq;
+
+CREATE SEQUENCE administrator_seq;
+
+DROP TABLE IF EXISTS Administrator;
+
+CREATE TABLE public."Administrator"
+(
+    "administratorId" integer NOT NULL DEFAULT NEXTVAL('administrator_seq'),,
+    name character varying(500) COLLATE pg_catalog."default" NOT NULL,
+    username character varying(250) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(150) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "Administrator_pkey" PRIMARY KEY ("administratorId")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."Administrator" OWNER to pguser;
+
+DROP SEQUENCE IF EXISTS message_seq;
+
+CREATE SEQUENCE message_seq;
+
+DROP TABLE IF EXISTS Message;
+
+CREATE TABLE public."Message"
+(
+    "messageId" integer NOT NULL DEFAULT NEXTVAL('message_seq'),
+    body character varying(4000) COLLATE pg_catalog."default",
+    subject character varying(400) COLLATE pg_catalog."default" NOT NULL,
+    "isDeletedInOrigin" boolean NOT NULL,
+    "isDeletedInDestination" boolean NOT NULL,
+    "isDeletedByAdmin" boolean NOT NULL,
+    "createDate" date NOT NULL,
+    "isPublic" boolean NOT NULL,
+    "destinationStockUserId" integer,
+    "originStockUserId" integer NOT NULL,
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("messageId"),
+    CONSTRAINT "destinationStockUserId" FOREIGN KEY ("destinationStockUserId")
+        REFERENCES public."StockUser" ("stockUserId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "originStockUserId" FOREIGN KEY ("originStockUserId")
+        REFERENCES public."StockUser" ("stockUserId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."Message" OWNER to pguser;
+
+DROP SEQUENCE IF EXISTS stockuser_seq;
+
+CREATE SEQUENCE stockuser_seq;
+
+DROP TABLE IF EXISTS StockUser;
+
+CREATE TABLE public."StockUser"
+(
+    "stockUserId" integer NOT NULL DEFAULT NEXTVAL('stockuser_seq'),
+    name character varying(500) COLLATE pg_catalog."default" NOT NULL,
+    username character varying(250) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(150) COLLATE pg_catalog."default" NOT NULL,
+    "bankAccountId" integer NOT NULL,
+    "bankPassword" character varying(150)[] COLLATE pg_catalog."default" NOT NULL,
+    "bankUsername" character varying(250) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "StockUser_pkey" PRIMARY KEY ("stockUserId")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."StockUser" OWNER to pguser;
+
+
+DROP SEQUENCE IF EXISTS useroperationtype_seq;
+
+CREATE SEQUENCE useroperationtype_seq;
+
+DROP TABLE IF EXISTS UserOperationType;
+
+
+CREATE TABLE public."UserOperationType"
+(
+    "userOperationTypeId" integer NOT NULL DEFAULT NEXTVAL('useroperationtype_seq'),
+    description character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "UserOperationType_pkey" PRIMARY KEY ("userOperationTypeId")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."UserOperationType"
+    OWNER to pguser;
+
+
+CREATE TABLE public."CompanyStockUser"
+(
+    count integer NOT NULL,
+    "companyId" integer NOT NULL,
+    "stockUserId" integer NOT NULL,
+    CONSTRAINT "CompanyStockUser_pkey" PRIMARY KEY ("stockUserId", "companyId"),
+    CONSTRAINT "companyId" FOREIGN KEY ("companyId")
+        REFERENCES public."Company" ("companyId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "stockUser" FOREIGN KEY ("stockUserId")
+        REFERENCES public."StockUser" ("stockUserId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."CompanyStockUser"
+    OWNER to pguser;
+
+DROP SEQUENCE IF EXISTS company_seq;
+
+CREATE SEQUENCE company_seq;
+
+DROP TABLE IF EXISTS Company;
+
+CREATE TABLE public."Company"
+(
+    "companyId" integer NOT NULL DEFAULT NEXTVAL('company_seq'),
+    description character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "IsRemoved" boolean NOT NULL,
+    "stockTotal" integer NOT NULL,
+    "stocksValue" numeric(20,5) NOT NULL,
+    "activityBranchId" integer NOT NULL,
+    CONSTRAINT "Company_pkey" PRIMARY KEY ("companyId"),
+    CONSTRAINT "companyId_fk" FOREIGN KEY ("activityBranchId")
+        REFERENCES public."ActivityBranch" ("activityBranchId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."Company"
+    OWNER to pguser;
+
+DROP SEQUENCE IF EXISTS activitybranch_seq;
+
+CREATE SEQUENCE activitybranch_seq;
+
+DROP TABLE IF EXISTS ActivityBranch;
+
+CREATE TABLE public."ActivityBranch"
+(
+    "activityBranchId" integer NOT NULL DEFAULT NEXTVAL('activitybranch_seq'),
+    description character varying(500) COLLATE pg_catalog."default" NOT NULL,
+    section character varying(3) COLLATE pg_catalog."default" NOT NULL,
+    division integer NOT NULL,
+    "group" integer,
+    class integer,
+    subclass integer,
+    CONSTRAINT "ActivityBranch_pkey" PRIMARY KEY ("activityBranchId")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."ActivityBranch"
+    OWNER to pguser;
+
+
+DROP SEQUENCE IF EXISTS companyoperation_seq;
+
+CREATE SEQUENCE companyoperation_seq;
+
+DROP TABLE IF EXISTS CompanyOperation;
+
+
+CREATE TABLE public."CompanyOperation"
+(
+    "companyId" integer NOT NULL,
+    "stockUserId" integer NOT NULL,
+    "userOperationId" integer NOT NULL,
+    "stockNumber" integer NOT NULL,
+    "minPrice" numeric(20,5),
+    "maxPrice" numeric(20,5),
+    "finishDate" date NOT NULL,
+    "minQuantity" integer,
+    CONSTRAINT "CompanyOperation_pkey" PRIMARY KEY ("companyId", "stockUserId", "userOperationId"),
+    CONSTRAINT "companyId_fk" FOREIGN KEY ("companyId")
+        REFERENCES public."Company" ("companyId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "stockUserId_fk" FOREIGN KEY ("stockUserId", "userOperationId")
+        REFERENCES public."UserOperation" ("stockUserId", "userOperationId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."CompanyOperation"
+    OWNER to pguser;
+
+DROP SEQUENCE IF EXISTS useroperation_seq;
+
+CREATE SEQUENCE useroperation_seq;
+
+DROP TABLE IF EXISTS UserOperation;
+
+CREATE TABLE public."UserOperation"
+(
+    "stockUserId" integer NOT NULL,
+    "userOperationId" integer NOT NULL DEFAULT NEXTVAL('useroperation_seq'),
+    "userOperationTypeId" integer NOT NULL,
+    "createDate" date NOT NULL,
+    "isImmediate" bit(1),
+    "conclusionDate" date,
+    "operationLimitDate" date,
+    CONSTRAINT "UserOperation_pkey" PRIMARY KEY ("stockUserId", "userOperationId"),
+    CONSTRAINT "stockUserId" FOREIGN KEY ("stockUserId")
+        REFERENCES public."StockUser" ("stockUserId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "userOperationTypeId" FOREIGN KEY ("userOperationTypeId")
+        REFERENCES public."UserOperationType" ("userOperationTypeId") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public."UserOperation"
+    OWNER to pguser;
+
